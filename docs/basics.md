@@ -1,83 +1,101 @@
-// Ref.
-const notes = firebase.database().ref('notes');
-const users = firebase.database().ref('users');
-console.info(notes);
+# Basics
 
-// Set.
-console.info(' -- SET --');
-notes.set({
+> Firebase Web API basics.
+
+All of the examples below can be run with or without [Promises](https://firebase.googleblog.com/2016/01/keeping-our-promises-and-callbacks_76.html).
+
+## References
+
+```
+const messages = firebase.database().ref('messages');
+const users = firebase.database().ref('users');
+```
+
+## Set
+
+Replaces entire tree.
+
+```
+messages.set({
   0: {
-    createdAt: Date('2016'),
-    text: 'through js',
+    text: '🍭',
   },
   1: {
-    createAt: Date('2017'),
-    text: 'yeee',
+    text: '🍬',
   },
 });
+```
 
-// Push.
-// console.info('-- PUSH --');
-// notes.push({
-//   text: "gen index firebase",
-// });
+## Push
 
-// Transactions.
-console.info('-- TRANSACTION --');
-const note0 = notes.child('0').child('text');
-console.info(note0);
-note0.transaction((note) => note + ' - modified');
+Appends new data by using a random identifier.
 
-// Read.
-console.info('-- READ --');
+```
+notes.push({
+  text: '🍫',
+});
+```
+
+## Transactions
+
+[Atomically modifies the data](https://www.firebase.com/docs/web/api/firebase/transaction.html).
+
+```
+const message0 = messages.child('0').child('text');
+message0.transaction((message) => message + ' - modified');
+```
+
+## Read
+
+```
 notes.on('value', (snapshot) => {
   console.info(snapshot.val());
 }, (error) => {
   console.error(error.code);
 });
-notes.off('value');
+notes.off('value'); // Stop listening for changes.
+```
 
-users.on('value', (snapshot) => {
-  console.info(snapshot.val());
-}, (error) => {
-  console.info(error.code);
-});
-
+```
 notes.once('value')
   .then((snapshot) => {
-    console.info('(once)');
     console.info(snapshot.val());
-});
+  });
+```
 
-// Order.
-console.info('-- ORDER --');
+## Order
+
+```
 notes.orderByChild('text').on('child_added', (data) => {
-  console.info('(ordered by text)');
   console.info(data.val());
 });
+```
 
+```
 notes.orderByKey().on('child_added', (data) => {
-  console.info('(ordered by key)');
   console.info(data.val());
 });
+```
 
-// Filter.
-console.info('-- FILTER --');
+## Filter
+
+```
 notes.equalTo('0').on('child_added', (data) => {
-  console.info('(filtered)');
   console.info(data.val());
 });
+```
 
-// Account.
-const email = 'foo@example.com';
-const password = '123456';
+## Account
 
+```
 firebase.auth().createUserWithEmailAndPassword(email, password)
   .catch((error) => {
     console.error(error.code);
     console.error(error.message);
   });
+```
 
+```
 firebase.auth().signInWithEmailAndPassword(email, password)
   .then(() => {
     console.info('Logged in!');
@@ -86,8 +104,11 @@ firebase.auth().signInWithEmailAndPassword(email, password)
     console.error(error.code);
     console.error(error.message);
   });
+```
 
-// OAuth.
+## OAuth
+
+```
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 function googleSignin() {
   firebase.auth()
@@ -105,3 +126,4 @@ function googleSignin() {
       console.info(error.message);
     });
 }
+```
