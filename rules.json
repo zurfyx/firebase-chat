@@ -1,0 +1,41 @@
+{
+  "rules": {
+    "users": {
+       "$uid": {
+       	 ".write": "$uid === auth.uid",
+         ".validate": "newData.hasChildren(['displayName', 'email'])",
+         "displayName": {
+           ".read": true,
+           ".validate": "newData.isString()"
+         },
+         "email": {
+           ".read": "$uid === auth.uid",
+           ".validate": "newData.isString()
+                         && newData.val().length > 0"
+         },
+         "$other": {
+           ".validate": false
+         }
+       }
+    },
+    "messages": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth !== null",
+        ".validate": "newData.hasChildren(['owner', 'text'])",
+        "owner": {
+          ".validate": "newData.val() === auth.uid
+                        && (!data.exists() || data.val() === auth.uid)
+          						  && root.child('users/' + newData.val()).exists()"
+        },
+        "text": {
+        	".validate": "newData.isString()
+                        && newData.val().length > 0",
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
