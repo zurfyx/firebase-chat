@@ -1,5 +1,6 @@
 ((firebase) => {
   const messages = firebase.database().ref('messages');
+  const users = firebase.database().ref('users');
   const googleProvider = new firebase.auth.GoogleAuthProvider();
 
   let user;
@@ -8,6 +9,11 @@
   firebase.auth().onAuthStateChanged((newUser) => {
     if (newUser) {
       user = newUser;
+
+      users.child(newUser.uid).set({
+        displayName: newUser.displayName,
+        email: newUser.email,
+      });
       document.querySelector('#loggedIn').innerHTML = `Logged in as ${newUser.displayName}`;
     }
   });
@@ -32,6 +38,7 @@
       
       const ownerContainer = document.createElement('div');
       const owner = document.createTextNode(message.owner);
+      loadDisplayName(message.owner, owner);
       ownerContainer.appendChild(owner);
       messageContainer.appendChild(ownerContainer);
       
@@ -42,17 +49,27 @@
     });
   });
 
+  function loadDisplayName(uid, node) {
+    users.child(uid + '/displayName').once('value', (snapshot) => {
+      node.nodeValue = snapshot.val();
+    });
+  }
+
   // Write.
   document.querySelector('#new').addEventListener('submit', (e) => {
     e.preventDefault();
+
+    if(!user) {
+      alert('Not logged in!');
+      return;
+    }
 
     const textElement = document.querySelector('#newText');
     const text = textElement.value;
     textElement.value = '';
 
-    messages.push({
-      text,
-      owner: user.uid,
-    });
+    messages
+      .push({ text, owner: user.uid })
+      .catch((error) => { alert(error); });
   });
 })(firebase);
