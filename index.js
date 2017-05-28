@@ -1,4 +1,4 @@
-((firebase) => {
+((firebase, moment) => {
   const messages = firebase.database().ref('messages');
   const users = firebase.database().ref('users');
   const googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -36,8 +36,12 @@
       
     const ownerContainer = document.createElement('div');
     const owner = document.createTextNode(message.owner);
+    const spacer = document.createTextNode(' - ');
+    const timestamp = document.createTextNode(moment(new Date(message.updatedAt)).fromNow());
     loadDisplayName(message.owner, owner);
     ownerContainer.appendChild(owner);
+    ownerContainer.appendChild(spacer);
+    ownerContainer.appendChild(timestamp);
     messageContainer.appendChild(ownerContainer);
     
     const text = document.createTextNode(message.text);
@@ -66,7 +70,11 @@
     textElement.value = '';
 
     messages
-      .push({ text, owner: user.uid })
+      .push({ 
+        text,
+        owner: user.uid,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+      })
       .catch((error) => { alert(error); });
   });
-})(firebase);
+})(firebase, moment);
