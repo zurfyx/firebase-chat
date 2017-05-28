@@ -29,24 +29,21 @@
   });
 
   // Read.
-  messages.on('value', (snapshot) => {
+  messages.on('child_added', (snapshot) => {
     const list = document.querySelector('#list');
-    const values = snapshot.val();
-    values && Object.keys(values).forEach((messageId) => {
-      const message = values[messageId];
-      const messageContainer = document.createElement('div');
+    const message = snapshot.val();
+    const messageContainer = document.createElement('div');
       
-      const ownerContainer = document.createElement('div');
-      const owner = document.createTextNode(message.owner);
-      loadDisplayName(message.owner, owner);
-      ownerContainer.appendChild(owner);
-      messageContainer.appendChild(ownerContainer);
+    const ownerContainer = document.createElement('div');
+    const owner = document.createTextNode(message.owner);
+    loadDisplayName(message.owner, owner);
+    ownerContainer.appendChild(owner);
+    messageContainer.appendChild(ownerContainer);
+    
+    const text = document.createTextNode(message.text);
+    messageContainer.appendChild(text);
       
-      const text = document.createTextNode(message.text);
-      messageContainer.appendChild(text);
-      
-      list.insertBefore(messageContainer, list.firstChild);
-    });
+    list.insertBefore(messageContainer, list.firstChild);
   });
 
   function loadDisplayName(uid, node) {
